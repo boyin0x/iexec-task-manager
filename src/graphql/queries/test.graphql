@@ -1,0 +1,6 @@
+query Test {
+    apps{
+    id
+    name
+    }
+}   
