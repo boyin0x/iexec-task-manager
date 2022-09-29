@@ -13,7 +13,15 @@ export const store = configureStore({
   },
 
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          "account/connect/fulfilled",
+          "account/connect/rejected",
+        ],
+        ignoredPaths: ["account.iexec"],
+      },
+    }).concat(api.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;
