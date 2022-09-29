@@ -1,15 +1,61 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
+import App from "./features/application/App";
+import reportWebVitals from "./reportWebVitals";
+import "./index.css";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import NewTaskForm from "./features/newTask/NewTaskForm";
+import Account from "./features/account/Account";
+import Home from "./features/home/Home";
+import { createTheme } from "@mui/material";
+import { ThemeProvider } from "@emotion/react";
+
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/account",
+        element: <Account />,
+      },
+      {
+        path: "/newTask",
+        element: <NewTaskForm />,
+      },
+    ],
+  },
+]);
+
+const customTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#FCD15A",
+    },
+    secondary: {
+      main: "#C4C4C4",
+    },
+  },
+});
+
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={customTheme}>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </ThemeProvider>
   </React.StrictMode>
 );
 
