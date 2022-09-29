@@ -14,11 +14,15 @@ It was developed based on https://github.com/iExecBlockchainComputing/iexec-apps
 - Manage tasks:
   - View requested tasks (call TheGraph).
 
-## Screenshots
+## Screenshots / Figma
 
 Figma proposed to the iExec team:
 
 [https://www.figma.com/file/RuMs2qbsN2K43WWJOzc5Ic/iExec-Task-Manager](https://www.figma.com/file/RuMs2qbsN2K43WWJOzc5Ic/iExec-Task-Manager)
+
+<img width="1224" alt="Home" src="https://user-images.githubusercontent.com/94027312/192952640-7faca065-0233-4668-a325-94d391ee8428.png">
+<img width="1225" alt="Account" src="https://user-images.githubusercontent.com/94027312/192952636-4501e293-73b9-44be-9b66-62d483b9b0b0.png">
+<img width="1225" alt="NewTask" src="https://user-images.githubusercontent.com/94027312/192952645-53c9e4b3-f42d-4dbc-8eb1-f9a67cb47fde.png">
 
 ## Scripts
 
