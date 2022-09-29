@@ -1,9 +1,17 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import {api} from './api'
+import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import accountReducer from "../features/account/accountSlice";
+import applicationReducer from "../features/application/applicationSlice";
+import newTaskReducer from "../features/newTask/newTaskSlice";
+import { api } from "./api";
+
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
+    account: accountReducer,
+    application: applicationReducer,
+    newTask: newTaskReducer,
   },
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),
 });
