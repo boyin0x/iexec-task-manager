@@ -1,24 +1,24 @@
 import { IExec } from "iexec";
 
 // BELLECOUR
-// const CHAIN_ID = '134';
-// const CHAIN_NAME = 'Bellecour';
-// const RPC_URL = 'https://bellecour.iex.ec';
-// const BLOCK_EXPLORER_URL = 'https://blockscout-bellecour.iex.ec';
-// export const WSS_URL =
-//   'wss://ws-thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
-// export const HTTPS_URL =
-//   'https://thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
+const CHAIN_ID = '134';
+const CHAIN_NAME = 'Bellecour';
+const RPC_URL = 'https://bellecour.iex.ec';
+const BLOCK_EXPLORER_URL = 'https://blockscout-bellecour.iex.ec';
+export const WSS_URL =
+  'wss://ws-thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
+export const HTTPS_URL =
+  'https://thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
 
 // VIVIANI
-const CHAIN_ID = "133";
-const CHAIN_NAME = "Viviani";
-const RPC_URL = "https://viviani.iex.ec";
-const BLOCK_EXPLORER_URL = "https://blockscout-viviani.iex.ec";
-export const WSS_URL =
-  "wss://ws-thegraph.viviani.iex.ec/subgraphs/name/viviani/poco-v5";
-export const HTTPS_URL =
-  "https://thegraph.viviani.iex.ec/subgraphs/name/viviani/poco-v5";
+// const CHAIN_ID = '133';
+// const CHAIN_NAME = 'Viviani';
+// const RPC_URL = 'https://viviani.iex.ec';
+// const BLOCK_EXPLORER_URL = 'https://blockscout-viviani.iex.ec';
+// export const WSS_URL =
+//   'wss://ws-thegraph.viviani.iex.ec/subgraphs/name/viviani/poco-v5';
+// export const HTTPS_URL =
+//   'https://thegraph.viviani.iex.ec/subgraphs/name/viviani/poco-v5';
 
 export const connect = async () => {
   if (window.ethereum) {
@@ -48,6 +48,8 @@ export const connect = async () => {
         },
       ],
     });
+  } else {
+    throw new Error("Please conect a wallet");
   }
 
   const { result } = await new Promise<{ result: string }>((resolve) =>
