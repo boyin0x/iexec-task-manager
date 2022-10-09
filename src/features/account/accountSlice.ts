@@ -106,6 +106,25 @@ const accountApi = api.injectEndpoints({
       invalidatesTags: ["ACCOUNT_BALANCES"],
     }),
 
+    withdraw: builder.mutation<{ amount: string; txHash: string }, string>({
+      queryFn: async (args, { getState }) => {
+        try {
+          const iexec = await getIexecAndRefresh(getState());
+          let withdraw = await iexec.account.withdraw(new BN(args));
+
+          return {
+            data: {
+              txHash: withdraw.txHash.toString(),
+              amount: withdraw.amount.toString(),
+            },
+          };
+        } catch (e) {
+          return { error: (e as Error).message || e };
+        }
+      },
+      invalidatesTags: ["ACCOUNT_BALANCES"],
+    }),
+
     getBalance: builder.query<{ stake: string; locked: string }, string>({
       queryFn: async (args, { getState }) => {
         const iexec = await getIexecAndRefresh(getState());
@@ -134,6 +153,7 @@ const accountApi = api.injectEndpoints({
   }),
 });
 export const {
+  useWithdrawMutation,
   usePushSecretMutation,
   useDepositMutation,
   useGetWalletAddressQuery,

@@ -6,6 +6,7 @@ import { selectAccountUserAddress, useGetBalanceQuery } from "./accountSlice";
 import Breadcumbs from "../../components/Breadcrumbs";
 import DepositForm from "./DepositForm";
 import PushSecretForm from "./PushSecretForm";
+import WithdrawForm from "./WithdrawForm";
 
 export default function Account() {
   const userAddress = useAppSelector(selectAccountUserAddress);
@@ -46,6 +47,9 @@ export default function Account() {
           </Grid>
           <Grid xs={12}>
             <DepositForm />
+          </Grid>
+          <Grid xs={12}>
+            <WithdrawForm />
           </Grid>
           <Grid xs={12}>
             <PushSecretForm />
