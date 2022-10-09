@@ -20,7 +20,7 @@ import {
   selectthereIsSomeRequestPending,
   useGetBalanceQuery,
 } from "../features/account/accountSlice";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { truncateAddress } from "../helpers/utils";
 import toast from "react-hot-toast";
 
@@ -72,30 +72,34 @@ export default function AppBar() {
           }}
         >
           <Box display="flex" alignItems="center">
-            <Box
-              component="img"
-              sx={{
-                height: 33,
-                paddingRight: "7px",
-              }}
-              alt="iExec"
-              src={logo}
-            />
-            <Typography
-              sx={{
-                fontFamily: "'Mulish', sans-serif",
-                fontStyle: "normal",
-                fontWeight: "700",
-                fontSize: "20px",
-                lineHeight: "24px",
-                letterSpacing: "0.4px",
-                color: "white",
-                width: "200px",
-              }}
-              color="inherit"
-            >
-              iExec Task Manager
-            </Typography>
+            <NavLink to="/">
+              <Box
+                component="img"
+                sx={{
+                  height: 33,
+                  paddingRight: "7px",
+                }}
+                alt="iExec"
+                src={logo}
+              />
+            </NavLink>
+            <NavLink style={{ textDecoration: "none", color: "white" }} to="/">
+              <Typography
+                sx={{
+                  fontFamily: "'Mulish', sans-serif",
+                  fontStyle: "normal",
+                  fontWeight: "700",
+                  fontSize: "20px",
+                  lineHeight: "24px",
+                  letterSpacing: "0.4px",
+                  color: "white",
+                  width: "200px",
+                }}
+                color="inherit"
+              >
+                iExec Task Manager
+              </Typography>
+            </NavLink>
           </Box>
 
           {isConnected && (
