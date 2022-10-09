@@ -17,10 +17,7 @@ const style = {
   borderStyle: "solid",
 };
 
-export default function IEModal(props: {
-  kind: AppModal;
-  children: ReactNode;
-}) {
+export default function IEModal(props: { kind: AppModal; children: ReactNode }) {
   const dispatch = useAppDispatch();
   // const handleOpen = () => dispatch(setOpenModal(props.kind));
   const handleClose = () => dispatch(setOpenModal(null));

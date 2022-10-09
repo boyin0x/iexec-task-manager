@@ -136,12 +136,7 @@ export default function NewTaskForm() {
                 </Grid>
                 <Grid xs={12} md={6}>
                   <Form onSubmit={handleSubmit(onSubmit)}>
-                    <Grid
-                      container
-                      spacing={1}
-                      alignItems="center"
-                      justifyContent={"center"}
-                    >
+                    <Grid container spacing={1} alignItems="center" justifyContent={"center"}>
                       <Grid xs={8}>
                         <Controller
                           name="app"
@@ -232,10 +227,7 @@ export default function NewTaskForm() {
                         <FormControl fullWidth>
                           <InputLabel id="categoryL">Category</InputLabel>
                           <Controller
-                            render={({
-                              field: { ref, ...field },
-                              fieldState,
-                            }) => (
+                            render={({ field: { ref, ...field }, fieldState }) => (
                               <>
                                 <Select
                                   inputRef={ref}
@@ -254,9 +246,7 @@ export default function NewTaskForm() {
                                     ))}
                                 </Select>
                                 {fieldState.error && (
-                                  <FormHelperText error>
-                                    {fieldState.error?.message}
-                                  </FormHelperText>
+                                  <FormHelperText error>{fieldState.error?.message}</FormHelperText>
                                 )}
                               </>
                             )}
@@ -293,13 +283,7 @@ export default function NewTaskForm() {
                       </Grid>
                       <Grid xs={12}>
                         <FormControlLabel
-                          control={
-                            <Checkbox
-                              color="secondary"
-                              name="limitPrice"
-                              value="yes"
-                            />
-                          }
+                          control={<Checkbox color="secondary" name="limitPrice" value="yes" />}
                           label="Place order at limit price"
                           {...register("limitPrice", {})}
                           onChange={onLimitPriceChange}
@@ -336,9 +320,7 @@ export default function NewTaskForm() {
                               type={"number"}
                               {...register("workerpoolmaxprice", {})}
                               error={Boolean(errors.workerpoolmaxprice)}
-                              helperText={
-                                errors.workerpoolmaxprice?.message ?? ""
-                              }
+                              helperText={errors.workerpoolmaxprice?.message ?? ""}
                             />
                           </Box>
                         </Grid>

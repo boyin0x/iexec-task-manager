@@ -32,15 +32,11 @@ export const newTaskSlice = createSlice({
 });
 export default newTaskSlice.reducer;
 
-export const { setSelectedApp, setSelectedDataset, setSelectedWorkerpool } =
-  newTaskSlice.actions;
+export const { setSelectedApp, setSelectedDataset, setSelectedWorkerpool } = newTaskSlice.actions;
 
-export const selectSelectedApp = (state: RootState) =>
-  state.newTask.selectedApp;
-export const selectSelectedDataset = (state: RootState) =>
-  state.newTask.selectedDataset;
-export const selectSelectedWorkerpool = (state: RootState) =>
-  state.newTask.selectedWorkerpool;
+export const selectSelectedApp = (state: RootState) => state.newTask.selectedApp;
+export const selectSelectedDataset = (state: RootState) => state.newTask.selectedDataset;
+export const selectSelectedWorkerpool = (state: RootState) => state.newTask.selectedWorkerpool;
 
 const newTaskApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -77,10 +73,7 @@ const newTaskApi = api.injectEndpoints({
       query: (searchText) => ({
         document: gql`
           query getDatasets($searchText: String) {
-            datasets: datasets(
-              first: 100
-              where: { name_contains_nocase: $searchText }
-            ) {
+            datasets: datasets(first: 100, where: { name_contains_nocase: $searchText }) {
               id
               name
             }
@@ -128,9 +121,7 @@ const newTaskApi = api.injectEndpoints({
           const { app, dataset, workerpool, category } = formFields;
 
           const iexec_input_files =
-            formFields.inputFiles.trim().length === 0
-              ? ""
-              : formFields.inputFiles.split(",");
+            formFields.inputFiles.trim().length === 0 ? "" : formFields.inputFiles.split(",");
           let requestOrderFields = {
             app,
             workerpool,
@@ -145,8 +136,7 @@ const newTaskApi = api.injectEndpoints({
           };
 
           if (formFields.limitPrice) {
-            const { appmaxprice, datasetmaxprice, workerpoolmaxprice } =
-              formFields;
+            const { appmaxprice, datasetmaxprice, workerpoolmaxprice } = formFields;
 
             requestOrderFields = {
               ...requestOrderFields,
@@ -163,16 +153,19 @@ const newTaskApi = api.injectEndpoints({
             const requestOrderToSign = await iexec.order.createRequestorder(
               clean_requestOrderFields
             );
-            const requestOrder = await iexec.order.signRequestorder(
-              requestOrderToSign
-            );
+            const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
 
             let published = await iexec.order.publishRequestorder(requestOrder);
 
             return { data: published };
           } else {
-            const { appOrder, datasetOrder, workerpoolOrder } =
-              await getBestOrders(iexec, app, dataset, workerpool, category);
+            const { appOrder, datasetOrder, workerpoolOrder } = await getBestOrders(
+              iexec,
+              app,
+              dataset,
+              workerpool,
+              category
+            );
 
             let clean_requestOrderFields = removeEmptyProps(requestOrderFields);
 
@@ -180,9 +173,7 @@ const newTaskApi = api.injectEndpoints({
               clean_requestOrderFields
             );
 
-            const requestOrder = await iexec.order.signRequestorder(
-              requestOrderToSign
-            );
+            const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
 
             const res = await iexec.order.matchOrders({
               apporder: appOrder,
@@ -225,10 +216,7 @@ async function getBestOrders(
 
   let datasetOrder;
   if (dataset) {
-    const { orders: dtsOrders } = await iexec.orderbook.fetchDatasetOrderbook(
-      dataset,
-      { app }
-    );
+    const { orders: dtsOrders } = await iexec.orderbook.fetchDatasetOrderbook(dataset, { app });
     datasetOrder = dtsOrders && dtsOrders[0] && dtsOrders[0].order;
     if (!datasetOrder) {
       throw new Error(`No orders for dataset`);

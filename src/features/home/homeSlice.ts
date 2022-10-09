@@ -1,10 +1,7 @@
 import { api, getIexecAndRefresh } from "./../../app/api";
 import { gql } from "graphql-request";
 import { Task } from "../../generated/graphql";
-import {
-  handleWss,
-  queryFromSubscription,
-} from "../../helpers/gqlSubscriptions";
+import { handleWss, queryFromSubscription } from "../../helpers/gqlSubscriptions";
 
 import { PublishedRequestorder } from "iexec/dist/lib/IExecOrderbookModule";
 import { ConsumableRequestorder } from "iexec/dist/lib/IExecOrderModule";
@@ -17,9 +14,7 @@ export const homeApi = api.injectEndpoints({
         try {
           const iexec = await getIexecAndRefresh(getState());
 
-          const { count, orders } = await iexec.orderbook.fetchRequestOrderbook(
-            { requester }
-          );
+          const { count, orders } = await iexec.orderbook.fetchRequestOrderbook({ requester });
 
           let casted = orders as unknown as PublishedRequestorder[];
           return { data: casted };
@@ -30,22 +25,21 @@ export const homeApi = api.injectEndpoints({
       providesTags: ["REQUEST_ORDERS"],
     }),
 
-    CancelRequestorder: builder.mutation<
-      { txHash: string; order: ConsumableRequestorder },
-      string
-    >({
-      queryFn: async (hash, { getState }) => {
-        try {
-          const iexec = await getIexecAndRefresh(getState());
-          const { order } = await iexec.orderbook.fetchRequestorder(hash);
-          const cancelResult = await iexec.order.cancelRequestorder(order);
-          return { data: cancelResult };
-        } catch (e) {
-          return { error: (e as Error).message || e };
-        }
-      },
-      invalidatesTags: ["REQUEST_ORDERS"],
-    }),
+    CancelRequestorder: builder.mutation<{ txHash: string; order: ConsumableRequestorder }, string>(
+      {
+        queryFn: async (hash, { getState }) => {
+          try {
+            const iexec = await getIexecAndRefresh(getState());
+            const { order } = await iexec.orderbook.fetchRequestorder(hash);
+            const cancelResult = await iexec.order.cancelRequestorder(order);
+            return { data: cancelResult };
+          } catch (e) {
+            return { error: (e as Error).message || e };
+          }
+        },
+        invalidatesTags: ["REQUEST_ORDERS"],
+      }
+    ),
 
     getTasks: builder.query<{ tasks: Task[] }, string>({
       query: (requester) => ({
@@ -77,11 +71,8 @@ export const homeApi = api.injectEndpoints({
   }),
 });
 
-export const {
-  useCancelRequestorderMutation,
-  useGetTasksQuery,
-  useGetRequestOrderbookQuery,
-} = homeApi;
+export const { useCancelRequestorderMutation, useGetTasksQuery, useGetRequestOrderbookQuery } =
+  homeApi;
 
 const GetTasks = gql`
   subscription getTasks($requester: String) {

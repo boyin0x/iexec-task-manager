@@ -48,11 +48,7 @@ export default function AppBar() {
 
   useEffect(() => {
     if (accountStatus === "failed") {
-      toast.error(
-        accountError && accountError.length > 0
-          ? accountError
-          : "Connection error"
-      );
+      toast.error(accountError && accountError.length > 0 ? accountError : "Connection error");
       navigate("/");
     }
   }, [accountStatus, accountError, navigate]);

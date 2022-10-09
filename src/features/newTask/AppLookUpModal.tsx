@@ -1,12 +1,4 @@
-import {
-  TextField,
-  TableBody,
-  TableRow,
-  TableCell,
-  Typography,
-  Box,
-  Button,
-} from "@mui/material";
+import { TextField, TableBody, TableRow, TableCell, Typography, Box, Button } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { AppModal, setOpenModal } from "../application/applicationSlice";
@@ -59,8 +51,7 @@ export default function AppLookUpModal() {
 function CollapsibleCell(props: { app: App }) {
   const dispatch = useAppDispatch();
   const [showOrders, setShowOrders] = useState(false);
-  const [fetch, { isUninitialized, isSuccess, data, isLoading }] =
-    useLazyFetchAppOrderbookQuery();
+  const [fetch, { isUninitialized, isSuccess, data, isLoading }] = useLazyFetchAppOrderbookQuery();
   useEffect(() => {
     if (showOrders && isUninitialized) {
       fetch(props.app.id);
@@ -73,12 +64,7 @@ function CollapsibleCell(props: { app: App }) {
     dispatch(setOpenModal(null));
   };
   return (
-    <TableCell
-      key={props.app.id}
-      onClick={() => setShowOrders(true)}
-      component="th"
-      scope="row"
-    >
+    <TableCell key={props.app.id} onClick={() => setShowOrders(true)} component="th" scope="row">
       <Box display="flex" flexDirection="row" justifyContent="space-between">
         <Typography>{props.app.id}</Typography>
         <Typography>{props.app.name}</Typography>

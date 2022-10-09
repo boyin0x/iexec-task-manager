@@ -2,10 +2,7 @@ import { Button, TableBody, TableCell, TableRow } from "@mui/material";
 import { useAppSelector } from "../../app/hooks";
 import { selectAccountUserAddress } from "../account/accountSlice";
 import IETable from "../../components/IETable.tsx";
-import {
-  useCancelRequestorderMutation,
-  useGetRequestOrderbookQuery,
-} from "./homeSlice";
+import { useCancelRequestorderMutation, useGetRequestOrderbookQuery } from "./homeSlice";
 
 export default function RequestOrders() {
   const acuunt = useAppSelector(selectAccountUserAddress);
@@ -42,11 +39,7 @@ function CancelOrderAction(props: { hash: string }) {
   const [cancel, { isLoading, isError }] = useCancelRequestorderMutation();
   return (
     <>
-      <Button
-        disabled={isLoading || isError}
-        size="small"
-        onClick={() => cancel(props.hash)}
-      >
+      <Button disabled={isLoading || isError} size="small" onClick={() => cancel(props.hash)}>
         Cancel
       </Button>
     </>

@@ -28,9 +28,7 @@ function App() {
         />
         {openModal === AppModal.LOOKUP_DATASET_MODAL && <DatasetLookUpModal />}
         {openModal === AppModal.LOOKUP_APP_MODAL && <AppLookUpModal />}
-        {openModal === AppModal.LOOKUP_WORKERPOOL_MODAL && (
-          <WorkerpoolLookUpModal />
-        )}
+        {openModal === AppModal.LOOKUP_WORKERPOOL_MODAL && <WorkerpoolLookUpModal />}
       </Container>
     </>
   );
