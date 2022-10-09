@@ -7,7 +7,7 @@ import { RequestOrderFields } from "./NewTaskForm";
 import { api, getIexecAndRefresh } from "../../app/api";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
-import { PublishedApporder } from "iexec/dist/lib/IExecOrderbookModule";
+import { PublishedApporder, PublishedWorkerpoolorder } from "iexec/dist/lib/IExecOrderbookModule";
 
 const initialState = {
   selectedApp: "",
@@ -112,16 +112,34 @@ const newTaskApi = api.injectEndpoints({
       },
     }),
 
+    fetchWorkerpoolOrderbook: builder.query<PublishedWorkerpoolorder[], string>({
+      queryFn: async (workerpool, { getState }) => {
+        const iexec = await getIexecAndRefresh(getState());
+        let { orders } = await iexec.orderbook.fetchWorkerpoolOrderbook({ workerpool });
+        return { data: orders };
+      },
+    }),
+
     createRequestOrder: builder.mutation<string, RequestOrderFields>({
       queryFn: async (formFields, { getState }) => {
         try {
           const iexec = await getIexecAndRefresh(getState());
           const account = await iexec.wallet.getAddress();
 
-          const { app, dataset, workerpool, category } = formFields;
+          const {
+            app,
+            dataset,
+            workerpool,
+            category,
+            iexec_result_encryption,
+            iexec_result_storage_provider,
+          } = formFields;
 
           const iexec_input_files =
             formFields.inputFiles.trim().length === 0 ? "" : formFields.inputFiles.split(",");
+
+          let tag = iexec_result_encryption ? "tee" : "";
+
           let requestOrderFields = {
             app,
             workerpool,
@@ -131,8 +149,11 @@ const newTaskApi = api.injectEndpoints({
               {
                 iexec_args: formFields.args,
                 iexec_input_files,
+                iexec_result_storage_provider,
+                iexec_result_encryption,
               } || "",
             category: category,
+            tag,
           };
 
           if (formFields.limitPrice) {
@@ -193,6 +214,7 @@ const newTaskApi = api.injectEndpoints({
   }),
 });
 export const {
+  useLazyFetchWorkerpoolOrderbookQuery,
   useLazyFetchAppOrderbookQuery,
   useGetCategoriesQuery,
   useCreateRequestOrderMutation,
