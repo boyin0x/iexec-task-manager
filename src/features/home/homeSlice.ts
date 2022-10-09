@@ -68,11 +68,29 @@ export const homeApi = api.injectEndpoints({
         );
       },
     }),
+
+    fetchTaskResult: builder.query<string, string>({
+      queryFn: async (taskId, { getState }) => {
+        try {
+          const iexec = await getIexecAndRefresh(getState());
+          const response = await iexec.task.fetchResults(taskId);
+          const binary = await response.blob();
+          let url = window.URL.createObjectURL(binary);
+          return { data: url };
+        } catch (e) {
+          return { error: (e as Error).message || e };
+        }
+      },
+    }),
   }),
 });
 
-export const { useCancelRequestorderMutation, useGetTasksQuery, useGetRequestOrderbookQuery } =
-  homeApi;
+export const {
+  useLazyFetchTaskResultQuery,
+  useCancelRequestorderMutation,
+  useGetTasksQuery,
+  useGetRequestOrderbookQuery,
+} = homeApi;
 
 const GetTasks = gql`
   subscription getTasks($requester: String) {
