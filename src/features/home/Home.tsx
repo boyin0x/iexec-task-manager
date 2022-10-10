@@ -44,22 +44,22 @@ export default function Home() {
                 </Card>
               </Grid>
 
-              {/* ORDERS */}
-              <Grid xs={12} md={6}>
-                <Card>
-                  <TableCardItem>
-                    <CardHeader title="Order Book" description="List of your pending orders" />
-                    <RequesterOrders />
-                  </TableCardItem>
-                </Card>
-              </Grid>
-
               {/* TASKS LIST */}
-              <Grid xs={12} md={6}>
+              <Grid xs={12}>
                 <Card>
                   <TableCardItem>
                     <CardHeader title="Tasks" description="List of your current tasks" />
                     <Tasks />
+                  </TableCardItem>
+                </Card>
+              </Grid>
+
+              {/* ORDERS */}
+              <Grid xs={12}>
+                <Card>
+                  <TableCardItem>
+                    <CardHeader title="Order Book" description="List of your pending orders" />
+                    <RequesterOrders />
                   </TableCardItem>
                 </Card>
               </Grid>
