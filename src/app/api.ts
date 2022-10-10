@@ -26,9 +26,7 @@ export const getIexecAndRefresh = async (state: any): Promise<IExec> => {
 async function checkStorageToken(iexec: IExec, account: string) {
   if (!(await iexec.storage.checkStorageTokenExists(account))) {
     const defaultStorageToken = await iexec.storage.defaultStorageLogin();
-    const { isPushed } = await iexec.storage.pushStorageToken(
-      defaultStorageToken
-    );
+    const { isPushed } = await iexec.storage.pushStorageToken(defaultStorageToken);
     if (!isPushed) {
       throw new Error("Unable to initialize IPFS storage for results");
     }

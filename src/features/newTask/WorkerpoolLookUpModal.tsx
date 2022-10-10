@@ -4,10 +4,7 @@ import { useAppDispatch } from "../../app/hooks";
 import { AppModal, setOpenModal } from "../application/applicationSlice";
 import IETable from "../../components/IETable.tsx";
 import IEModal from "../application/IEModal";
-import {
-  setSelectedWorkerpool,
-  useLazySearchWorkerpoolsQuery,
-} from "./newTaskSlice";
+import { setSelectedWorkerpool, useLazySearchWorkerpoolsQuery } from "./newTaskSlice";
 
 export default function WorkerpoolLookUpModal() {
   const [trigger, result] = useLazySearchWorkerpoolsQuery();
@@ -41,11 +38,7 @@ export default function WorkerpoolLookUpModal() {
           <TableBody>
             {result?.data?.workerpools &&
               result.data?.workerpools.map((workerpool) => (
-                <TableRow
-                  hover
-                  key={workerpool.id}
-                  onClick={() => handleSelected(workerpool.id)}
-                >
+                <TableRow hover key={workerpool.id} onClick={() => handleSelected(workerpool.id)}>
                   <TableCell component="th" scope="row">
                     {workerpool.id}
                   </TableCell>

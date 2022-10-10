@@ -2,10 +2,9 @@ import { Button, TableBody, TableCell, TableRow } from "@mui/material";
 import { useAppSelector } from "../../app/hooks";
 import { selectAccountUserAddress } from "../account/accountSlice";
 import IETable from "../../components/IETable.tsx";
-import {
-  useCancelRequestorderMutation,
-  useGetRequestOrderbookQuery,
-} from "./homeSlice";
+import { useCancelRequestorderMutation, useGetRequestOrderbookQuery } from "./homeSlice";
+import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 export default function RequestOrders() {
   const acuunt = useAppSelector(selectAccountUserAddress);
@@ -21,13 +20,13 @@ export default function RequestOrders() {
                 <TableCell component="th" scope="row">
                   {order.orderHash}
                 </TableCell>
-                <TableCell style={{ width: 10 }} align="right">
+                <TableCell style={{ width: 10 }} align="center">
                   {order.order.app}
                 </TableCell>
-                <TableCell style={{ width: 10 }} align="right">
+                <TableCell style={{ width: 10 }} align="center">
                   {order.status}
                 </TableCell>
-                <TableCell style={{ width: 10 }} align="right">
+                <TableCell style={{ width: 10 }} align="center">
                   <CancelOrderAction hash={order.orderHash} />
                 </TableCell>
               </TableRow>
@@ -39,14 +38,17 @@ export default function RequestOrders() {
 }
 
 function CancelOrderAction(props: { hash: string }) {
-  const [cancel, { isLoading, isError }] = useCancelRequestorderMutation();
+  const [cancel, { isLoading, isError, error }] = useCancelRequestorderMutation();
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.toString());
+    }
+  }, [error]);
+
   return (
     <>
-      <Button
-        disabled={isLoading || isError}
-        size="small"
-        onClick={() => cancel(props.hash)}
-      >
+      <Button disabled={isLoading || isError} size="small" onClick={() => cancel(props.hash)}>
         Cancel
       </Button>
     </>

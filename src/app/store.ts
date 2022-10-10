@@ -15,10 +15,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          "account/connect/fulfilled",
-          "account/connect/rejected",
-        ],
+        ignoredActions: ["account/connect/fulfilled", "account/connect/rejected"],
         ignoredPaths: ["account.iexec"],
       },
     }).concat(api.middleware),

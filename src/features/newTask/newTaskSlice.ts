@@ -7,7 +7,7 @@ import { RequestOrderFields } from "./NewTaskForm";
 import { api, getIexecAndRefresh } from "../../app/api";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
-import { PublishedApporder } from "iexec/dist/lib/IExecOrderbookModule";
+import { PublishedApporder, PublishedWorkerpoolorder } from "iexec/dist/lib/IExecOrderbookModule";
 
 const initialState = {
   selectedApp: "",
@@ -32,15 +32,11 @@ export const newTaskSlice = createSlice({
 });
 export default newTaskSlice.reducer;
 
-export const { setSelectedApp, setSelectedDataset, setSelectedWorkerpool } =
-  newTaskSlice.actions;
+export const { setSelectedApp, setSelectedDataset, setSelectedWorkerpool } = newTaskSlice.actions;
 
-export const selectSelectedApp = (state: RootState) =>
-  state.newTask.selectedApp;
-export const selectSelectedDataset = (state: RootState) =>
-  state.newTask.selectedDataset;
-export const selectSelectedWorkerpool = (state: RootState) =>
-  state.newTask.selectedWorkerpool;
+export const selectSelectedApp = (state: RootState) => state.newTask.selectedApp;
+export const selectSelectedDataset = (state: RootState) => state.newTask.selectedDataset;
+export const selectSelectedWorkerpool = (state: RootState) => state.newTask.selectedWorkerpool;
 
 const newTaskApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -77,10 +73,7 @@ const newTaskApi = api.injectEndpoints({
       query: (searchText) => ({
         document: gql`
           query getDatasets($searchText: String) {
-            datasets: datasets(
-              first: 100
-              where: { name_contains_nocase: $searchText }
-            ) {
+            datasets: datasets(first: 100, where: { name_contains_nocase: $searchText }) {
               id
               name
             }
@@ -119,18 +112,34 @@ const newTaskApi = api.injectEndpoints({
       },
     }),
 
+    fetchWorkerpoolOrderbook: builder.query<PublishedWorkerpoolorder[], string>({
+      queryFn: async (workerpool, { getState }) => {
+        const iexec = await getIexecAndRefresh(getState());
+        let { orders } = await iexec.orderbook.fetchWorkerpoolOrderbook({ workerpool });
+        return { data: orders };
+      },
+    }),
+
     createRequestOrder: builder.mutation<string, RequestOrderFields>({
       queryFn: async (formFields, { getState }) => {
         try {
           const iexec = await getIexecAndRefresh(getState());
           const account = await iexec.wallet.getAddress();
 
-          const { app, dataset, workerpool, category } = formFields;
+          const {
+            app,
+            dataset,
+            workerpool,
+            category,
+            iexec_result_encryption,
+            iexec_result_storage_provider,
+          } = formFields;
 
           const iexec_input_files =
-            formFields.inputFiles.trim().length === 0
-              ? ""
-              : formFields.inputFiles.split(",");
+            formFields.inputFiles.trim().length === 0 ? "" : formFields.inputFiles.split(",");
+
+          let tag = iexec_result_encryption ? "tee" : "";
+
           let requestOrderFields = {
             app,
             workerpool,
@@ -140,13 +149,15 @@ const newTaskApi = api.injectEndpoints({
               {
                 iexec_args: formFields.args,
                 iexec_input_files,
+                iexec_result_storage_provider,
+                iexec_result_encryption,
               } || "",
             category: category,
+            tag,
           };
 
           if (formFields.limitPrice) {
-            const { appmaxprice, datasetmaxprice, workerpoolmaxprice } =
-              formFields;
+            const { appmaxprice, datasetmaxprice, workerpoolmaxprice } = formFields;
 
             requestOrderFields = {
               ...requestOrderFields,
@@ -157,32 +168,28 @@ const newTaskApi = api.injectEndpoints({
               },
             };
 
-            let clean_requestOrderFields = removeEmptyProps(requestOrderFields);
-            console.log({ clean_requestOrderFields });
-
             const requestOrderToSign = await iexec.order.createRequestorder(
-              clean_requestOrderFields
+              removeEmptyProps(requestOrderFields)
             );
-            const requestOrder = await iexec.order.signRequestorder(
-              requestOrderToSign
-            );
+            const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
 
             let published = await iexec.order.publishRequestorder(requestOrder);
 
             return { data: published };
           } else {
-            const { appOrder, datasetOrder, workerpoolOrder } =
-              await getBestOrders(iexec, app, dataset, workerpool, category);
-
-            let clean_requestOrderFields = removeEmptyProps(requestOrderFields);
+            const { appOrder, datasetOrder, workerpoolOrder } = await getBestOrders(
+              iexec,
+              app,
+              dataset,
+              workerpool,
+              category
+            );
 
             const requestOrderToSign = await iexec.order.createRequestorder(
-              clean_requestOrderFields
+              removeEmptyProps(requestOrderFields)
             );
 
-            const requestOrder = await iexec.order.signRequestorder(
-              requestOrderToSign
-            );
+            const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
 
             const res = await iexec.order.matchOrders({
               apporder: appOrder,
@@ -202,6 +209,7 @@ const newTaskApi = api.injectEndpoints({
   }),
 });
 export const {
+  useLazyFetchWorkerpoolOrderbookQuery,
   useLazyFetchAppOrderbookQuery,
   useGetCategoriesQuery,
   useCreateRequestOrderMutation,
@@ -225,10 +233,7 @@ async function getBestOrders(
 
   let datasetOrder;
   if (dataset) {
-    const { orders: dtsOrders } = await iexec.orderbook.fetchDatasetOrderbook(
-      dataset,
-      { app }
-    );
+    const { orders: dtsOrders } = await iexec.orderbook.fetchDatasetOrderbook(dataset, { app });
     datasetOrder = dtsOrders && dtsOrders[0] && dtsOrders[0].order;
     if (!datasetOrder) {
       throw new Error(`No orders for dataset`);
@@ -237,6 +242,7 @@ async function getBestOrders(
 
   const { orders: wkpOrders } = await iexec.orderbook.fetchWorkerpoolOrderbook({
     category,
+    workerpool,
   });
   const workerpoolOrder = wkpOrders && wkpOrders[0] && wkpOrders[0].order;
   if (!workerpoolOrder) {

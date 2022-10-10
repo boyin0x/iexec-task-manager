@@ -38,11 +38,7 @@ export default function DatasetLookUpModal() {
           <TableBody>
             {result?.data?.datasets &&
               result.data?.datasets.map((dataset) => (
-                <TableRow
-                  hover
-                  key={dataset.id}
-                  onClick={() => handleSelected(dataset.id)}
-                >
+                <TableRow hover key={dataset.id} onClick={() => handleSelected(dataset.id)}>
                   <TableCell component="th" scope="row">
                     {dataset.id}
                   </TableCell>

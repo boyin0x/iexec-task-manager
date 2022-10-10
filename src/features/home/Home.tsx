@@ -2,12 +2,7 @@ import RequesterOrders from "./RequesterOrders";
 import Tasks from "./Tasks";
 import { Box, Button } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import {
-  TableCardItem,
-  Card,
-  CardHeader,
-  FormItem,
-} from "../../components/styled";
+import { TableCardItem, Card, CardHeader, FormItem } from "../../components/styled";
 import { selectAccountIsConnected } from "../account/accountSlice";
 import { useAppSelector } from "../../app/hooks";
 import Breadcumbs from "../../components/Breadcrumbs";
@@ -39,16 +34,8 @@ export default function Home() {
                       />
                     </FormItem>
                     <FormItem>
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end"
-                        gap={1}
-                        alignContent="center"
-                      >
-                        <Button
-                          variant="contained"
-                          onClick={() => navigate("/newTask")}
-                        >
+                      <Box display="flex" justifyContent="flex-end" gap={1} alignContent="center">
+                        <Button variant="contained" onClick={() => navigate("/newTask")}>
                           Request Execution
                         </Button>
                       </Box>
@@ -57,28 +44,22 @@ export default function Home() {
                 </Card>
               </Grid>
 
-              {/* ORDERS */}
-              <Grid xs={12} md={6}>
+              {/* TASKS LIST */}
+              <Grid xs={12}>
                 <Card>
                   <TableCardItem>
-                    <CardHeader
-                      title="Order Book"
-                      description="List of your pending orders"
-                    />
-                    <RequesterOrders />
+                    <CardHeader title="Tasks" description="List of your current tasks" />
+                    <Tasks />
                   </TableCardItem>
                 </Card>
               </Grid>
 
-              {/* TASKS LIST */}
-              <Grid xs={12} md={6}>
+              {/* ORDERS */}
+              <Grid xs={12}>
                 <Card>
                   <TableCardItem>
-                    <CardHeader
-                      title="Tasks"
-                      description="List of your current tasks"
-                    />
-                    <Tasks />
+                    <CardHeader title="Order Book" description="List of your pending orders" />
+                    <RequesterOrders />
                   </TableCardItem>
                 </Card>
               </Grid>

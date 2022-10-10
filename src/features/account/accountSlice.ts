@@ -19,24 +19,18 @@ const initialState: AccountState = {
   error: null,
 };
 
-export const connect = createAsyncThunk(
-  "account/connect",
-  async (_, { dispatch, getState }) => {
-    const iexec = (await connectIexec()) as IExec;
-    const userAddress = await iexec.wallet.getAddress();
+export const connect = createAsyncThunk("account/connect", async (_, { dispatch, getState }) => {
+  const iexec = (await connectIexec()) as IExec;
+  const userAddress = await iexec.wallet.getAddress();
 
-    let prevAddress = (getState() as RootState).account.userAddress as string;
+  let prevAddress = (getState() as RootState).account.userAddress as string;
 
-    if (
-      prevAddress.length > 0 &&
-      prevAddress.toLowerCase() !== userAddress.toLowerCase()
-    ) {
-      dispatch(api.util.resetApiState());
-    }
-
-    return { iexec, userAddress: userAddress.toLowerCase() };
+  if (prevAddress.length > 0 && prevAddress.toLowerCase() !== userAddress.toLowerCase()) {
+    dispatch(api.util.resetApiState());
   }
-);
+
+  return { iexec, userAddress: userAddress.toLowerCase() };
+});
 
 export const accountSlice = createSlice({
   name: "account",
@@ -61,19 +55,13 @@ export const accountSlice = createSlice({
 export default accountSlice.reducer;
 
 export const selectthereIsSomeRequestPending = (state: RootState) =>
-  Object.values(state.api.queries).some(
-    (query) => query?.status === "pending"
-  ) ||
-  Object.values(state.api.mutations).some(
-    (query) => query?.status === "pending"
-  );
+  Object.values(state.api.queries).some((query) => query?.status === "pending") ||
+  Object.values(state.api.mutations).some((query) => query?.status === "pending");
 export const selectAccountIexec = (state: RootState) => state.account.iexec;
-export const selectAccountIsConnected = (state: RootState) =>
-  state.account.status === "Connected";
+export const selectAccountIsConnected = (state: RootState) => state.account.status === "Connected";
 export const selectAccountStatus = (state: RootState) => state.account.status;
 export const selectAccountError = (state: RootState) => state.account.error;
-export const selectAccountUserAddress = (state: RootState) =>
-  state.account.userAddress;
+export const selectAccountUserAddress = (state: RootState) => state.account.userAddress;
 
 const accountApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -84,10 +72,7 @@ const accountApi = api.injectEndpoints({
       queryFn: async (args, { getState }) => {
         try {
           const iexec = await getIexecAndRefresh(getState());
-          let result = await iexec.secrets.pushRequesterSecret(
-            args.secretName,
-            args.secretValue
-          );
+          let result = await iexec.secrets.pushRequesterSecret(args.secretName, args.secretValue);
           // console.log({ result })
           if (!result.isPushed) {
             return { error: "Unable to push secret" };
@@ -112,6 +97,25 @@ const accountApi = api.injectEndpoints({
             data: {
               txHash: deposit.txHash.toString(),
               amount: deposit.amount.toString(),
+            },
+          };
+        } catch (e) {
+          return { error: (e as Error).message || e };
+        }
+      },
+      invalidatesTags: ["ACCOUNT_BALANCES"],
+    }),
+
+    withdraw: builder.mutation<{ amount: string; txHash: string }, string>({
+      queryFn: async (args, { getState }) => {
+        try {
+          const iexec = await getIexecAndRefresh(getState());
+          let withdraw = await iexec.account.withdraw(new BN(args));
+
+          return {
+            data: {
+              txHash: withdraw.txHash.toString(),
+              amount: withdraw.amount.toString(),
             },
           };
         } catch (e) {
@@ -149,6 +153,7 @@ const accountApi = api.injectEndpoints({
   }),
 });
 export const {
+  useWithdrawMutation,
   usePushSecretMutation,
   useDepositMutation,
   useGetWalletAddressQuery,

@@ -10,16 +10,19 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { selectAccountUserAddress } from "../account/accountSlice";
 import { Controller, useForm } from "react-hook-form";
 import {
   selectSelectedApp,
   selectSelectedDataset,
   selectSelectedWorkerpool,
+  setSelectedApp,
+  setSelectedDataset,
+  setSelectedWorkerpool,
   useCreateRequestOrderMutation,
   useGetCategoriesQuery,
+  useLazyFetchWorkerpoolOrderbookQuery,
 } from "./newTaskSlice";
 import Grid from "@mui/material/Unstable_Grid2";
 import { AppModal, setOpenModal } from "../application/applicationSlice";
@@ -39,10 +42,11 @@ export interface RequestOrderFields {
   appmaxprice: string;
   datasetmaxprice: string;
   workerpoolmaxprice: string;
+  iexec_result_encryption: boolean;
+  iexec_result_storage_provider: string;
 }
 
 export default function NewTaskForm() {
-  const userAddress = useAppSelector(selectAccountUserAddress);
   const dispatch = useAppDispatch();
   const [limitPrice, setLimitPrice] = useState(false);
 
@@ -51,7 +55,13 @@ export default function NewTaskForm() {
   const selectedApp = useAppSelector(selectSelectedApp);
   const selectedDataset = useAppSelector(selectSelectedDataset);
   const selectedWorkerpool = useAppSelector(selectSelectedWorkerpool);
-  const { data: categoriesData, error } = useGetCategoriesQuery();
+  const [wpOrdersFetch, wpOrdersResult] = useLazyFetchWorkerpoolOrderbookQuery();
+
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const storageProviders = [
+    { id: "ipfs", name: "Ipfs" },
+    { id: "dropbox", name: "Dropbox" },
+  ];
 
   useEffect(() => {
     if (result.error) {
@@ -76,12 +86,24 @@ export default function NewTaskForm() {
   });
 
   useEffect(() => {
+    dispatch(setSelectedApp(""));
+    dispatch(setSelectedDataset(""));
+    dispatch(setSelectedWorkerpool(""));
+  }, [dispatch]);
+
+  useEffect(() => {
     reset({
       app: selectedApp,
       dataset: selectedDataset,
       workerpool: selectedWorkerpool,
     });
-  }, [selectedApp, selectedDataset, selectedWorkerpool]);
+  }, [selectedApp, selectedDataset, selectedWorkerpool, reset]);
+
+  useEffect(() => {
+    if (selectedWorkerpool.length > 0) {
+      wpOrdersFetch(selectedWorkerpool);
+    }
+  }, [selectedWorkerpool, wpOrdersFetch]);
 
   const validateInputFiles = (value: string) => {
     let files = value.split(",");
@@ -97,10 +119,24 @@ export default function NewTaskForm() {
   };
 
   const onSubmit = async (data: RequestOrderFields) => {
+    data.iexec_result_encryption = Boolean(data.iexec_result_encryption);
     try {
       const payload = await createRequestOrder(data);
     } catch (error) {
       setError("app", { message: "Order creation error" });
+    }
+  };
+
+  const isCategorySelectable = (categoryId: string) => {
+    if (
+      selectedWorkerpool.trim().length === 0 ||
+      wpOrdersResult.isLoading ||
+      !wpOrdersResult.isSuccess ||
+      wpOrdersResult.data.length === 0
+    ) {
+      return true;
+    } else {
+      return wpOrdersResult.data.some((o) => o.order.category.toString() === categoryId);
     }
   };
 
@@ -115,6 +151,15 @@ export default function NewTaskForm() {
   const handleBrowseWorkerpool = () => {
     dispatch(setOpenModal(AppModal.LOOKUP_WORKERPOOL_MODAL));
   };
+
+  const appValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedApp(e.target.value));
+
+  const datasetValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedDataset(e.target.value));
+
+  const workerpoolValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedWorkerpool(e.target.value));
 
   return (
     <>
@@ -136,12 +181,7 @@ export default function NewTaskForm() {
                 </Grid>
                 <Grid xs={12} md={6}>
                   <Form onSubmit={handleSubmit(onSubmit)}>
-                    <Grid
-                      container
-                      spacing={1}
-                      alignItems="center"
-                      justifyContent={"center"}
-                    >
+                    <Grid container spacing={1} alignItems="center" justifyContent={"center"}>
                       <Grid xs={8}>
                         <Controller
                           name="app"
@@ -150,6 +190,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={appValueChanged}
                               fullWidth
                               placeholder="app address"
                               required
@@ -179,6 +220,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={datasetValueChanged}
                               fullWidth
                               placeholder="dataset address"
                               label={"Dataset"}
@@ -207,6 +249,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={workerpoolValueChanged}
                               fullWidth
                               placeholder="workerpool address"
                               label={"Workerpool"}
@@ -232,10 +275,7 @@ export default function NewTaskForm() {
                         <FormControl fullWidth>
                           <InputLabel id="categoryL">Category</InputLabel>
                           <Controller
-                            render={({
-                              field: { ref, ...field },
-                              fieldState,
-                            }) => (
+                            render={({ field: { ref, ...field }, fieldState }) => (
                               <>
                                 <Select
                                   inputRef={ref}
@@ -248,15 +288,17 @@ export default function NewTaskForm() {
                                   </MenuItem>
                                   {categoriesData &&
                                     categoriesData?.categories.map((c) => (
-                                      <MenuItem key={c.id} value={c.id}>
+                                      <MenuItem
+                                        key={c.id}
+                                        value={c.id}
+                                        disabled={!isCategorySelectable(c.id)}
+                                      >
                                         {c.name}
                                       </MenuItem>
                                     ))}
                                 </Select>
                                 {fieldState.error && (
-                                  <FormHelperText error>
-                                    {fieldState.error?.message}
-                                  </FormHelperText>
+                                  <FormHelperText error>{fieldState.error?.message}</FormHelperText>
                                 )}
                               </>
                             )}
@@ -264,6 +306,38 @@ export default function NewTaskForm() {
                             rules={{ required: true }}
                             control={control}
                             defaultValue={""}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid xs={12}>
+                        <FormControl fullWidth>
+                          <InputLabel id="iexec_result_storage_providerL">
+                            Storage Provider
+                          </InputLabel>
+                          <Controller
+                            render={({ field: { ref, ...field }, fieldState }) => (
+                              <>
+                                <Select
+                                  inputRef={ref}
+                                  {...field}
+                                  labelId={"iexec_result_storage_providerL"}
+                                  label={"Storage Provider"}
+                                >
+                                  {storageProviders.map((c) => (
+                                    <MenuItem key={c.id} value={c.id}>
+                                      {c.name}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                                {fieldState.error && (
+                                  <FormHelperText error>{fieldState.error?.message}</FormHelperText>
+                                )}
+                              </>
+                            )}
+                            name={"iexec_result_storage_provider"}
+                            rules={{ required: true }}
+                            control={control}
+                            defaultValue={"ipfs"}
                           />
                         </FormControl>
                       </Grid>
@@ -296,10 +370,17 @@ export default function NewTaskForm() {
                           control={
                             <Checkbox
                               color="secondary"
-                              name="limitPrice"
-                              value="yes"
+                              name="iexec_result_encryption"
+                              value={"encrypt"}
                             />
                           }
+                          label="Encrypt result"
+                          {...register("iexec_result_encryption", {})}
+                        />
+                      </Grid>
+                      <Grid xs={12}>
+                        <FormControlLabel
+                          control={<Checkbox color="secondary" name="limitPrice" value="yes" />}
                           label="Place order at limit price"
                           {...register("limitPrice", {})}
                           onChange={onLimitPriceChange}
@@ -336,9 +417,7 @@ export default function NewTaskForm() {
                               type={"number"}
                               {...register("workerpoolmaxprice", {})}
                               error={Boolean(errors.workerpoolmaxprice)}
-                              helperText={
-                                errors.workerpoolmaxprice?.message ?? ""
-                              }
+                              helperText={errors.workerpoolmaxprice?.message ?? ""}
                             />
                           </Box>
                         </Grid>

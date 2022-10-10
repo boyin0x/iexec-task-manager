@@ -37,10 +37,7 @@ export const handleWss = async (
     };
 
     ws.onclose = function (e) {
-      console.log(
-        "Socket is closed. Reconnect will be attempted in 1 second.",
-        e.reason
-      );
+      console.log("Socket is closed. Reconnect will be attempted in 1 second.", e.reason);
       // setTimeout(function() {
       // connect();
       // }, 1000);

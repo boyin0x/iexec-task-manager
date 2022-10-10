@@ -1,14 +1,12 @@
 import { IExec } from "iexec";
 
 // BELLECOUR
-const CHAIN_ID = '134';
-const CHAIN_NAME = 'Bellecour';
-const RPC_URL = 'https://bellecour.iex.ec';
-const BLOCK_EXPLORER_URL = 'https://blockscout-bellecour.iex.ec';
-export const WSS_URL =
-  'wss://ws-thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
-export const HTTPS_URL =
-  'https://thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5';
+const CHAIN_ID = "134";
+const CHAIN_NAME = "Bellecour";
+const RPC_URL = "https://bellecour.iex.ec";
+const BLOCK_EXPLORER_URL = "https://blockscout-bellecour.iex.ec";
+export const WSS_URL = "wss://ws-thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5";
+export const HTTPS_URL = "https://thegraph.bellecour.iex.ec/subgraphs/name/bellecour/poco-v5";
 
 // VIVIANI
 // const CHAIN_ID = '133';
@@ -22,12 +20,8 @@ export const HTTPS_URL =
 
 export const connect = async () => {
   if (window.ethereum) {
-    window.ethereum.on("chainChanged", (_chainId: any) =>
-      window.location.reload()
-    );
-    window.ethereum.on("accountsChanged", (_accounts: any) =>
-      window.location.reload()
-    );
+    window.ethereum.on("chainChanged", (_chainId: any) => window.location.reload());
+    window.ethereum.on("accountsChanged", (_accounts: any) => window.location.reload());
     await window.ethereum.request({
       method: "eth_requestAccounts",
     });

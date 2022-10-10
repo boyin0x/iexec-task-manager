@@ -18,10 +18,10 @@ import {
   selectAccountStatus,
   selectAccountUserAddress,
   selectthereIsSomeRequestPending,
+  useGetBalanceQuery,
 } from "../features/account/accountSlice";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { truncateAddress } from "../helpers/utils";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import toast from "react-hot-toast";
 
 const Gradient = styled(Box)(({ theme }) => ({
@@ -35,8 +35,9 @@ export default function AppBar() {
   const isConnected = useAppSelector(selectAccountIsConnected);
   const accountStatus = useAppSelector(selectAccountStatus);
   const accountError = useAppSelector(selectAccountError);
+  const userAddress = useAppSelector(selectAccountUserAddress);
+  const balance = useGetBalanceQuery(userAddress);
 
-  const accountAddress = useAppSelector(selectAccountUserAddress);
   const navigate = useNavigate();
 
   const handleConnect = () => dispatch(connect());
@@ -48,11 +49,7 @@ export default function AppBar() {
 
   useEffect(() => {
     if (accountStatus === "failed") {
-      toast.error(
-        accountError && accountError.length > 0
-          ? accountError
-          : "Connection error"
-      );
+      toast.error(accountError && accountError.length > 0 ? accountError : "Connection error");
       navigate("/");
     }
   }, [accountStatus, accountError, navigate]);
@@ -75,30 +72,34 @@ export default function AppBar() {
           }}
         >
           <Box display="flex" alignItems="center">
-            <Box
-              component="img"
-              sx={{
-                height: 33,
-                paddingRight: "7px",
-              }}
-              alt="iExec"
-              src={logo}
-            />
-            <Typography
-              sx={{
-                fontFamily: "'Mulish', sans-serif",
-                fontStyle: "normal",
-                fontWeight: "700",
-                fontSize: "20px",
-                lineHeight: "24px",
-                letterSpacing: "0.4px",
-                color: "white",
-                width: "200px",
-              }}
-              color="inherit"
-            >
-              iExec Task Manager
-            </Typography>
+            <NavLink to="/">
+              <Box
+                component="img"
+                sx={{
+                  height: 33,
+                  paddingRight: "7px",
+                }}
+                alt="iExec"
+                src={logo}
+              />
+            </NavLink>
+            <NavLink style={{ textDecoration: "none", color: "white" }} to="/">
+              <Typography
+                sx={{
+                  fontFamily: "'Mulish', sans-serif",
+                  fontStyle: "normal",
+                  fontWeight: "700",
+                  fontSize: "20px",
+                  lineHeight: "24px",
+                  letterSpacing: "0.4px",
+                  color: "white",
+                  width: "200px",
+                }}
+                color="inherit"
+              >
+                iExec Task Manager
+              </Typography>
+            </NavLink>
           </Box>
 
           {isConnected && (
@@ -109,31 +110,20 @@ export default function AppBar() {
               justifyContent="flex-end"
               gap={2}
             >
-              <Typography
-                sx={{
-                  fontFamily: "'Mulish', sans-serif",
-                  fontStyle: "normal",
-                  fontWeight: "700",
-                  fontSize: "20px",
-                  lineHeight: "24px",
-                  letterSpacing: "0.4px",
-                  color: "white",
-                }}
-                variant="h6"
-                color="inherit"
-                component="div"
-              >
-                {truncateAddress(accountAddress)}
+              <Typography variant="body2" color="inherit" component="div">
+                {truncateAddress(userAddress)}
               </Typography>
-
-              <IconButton
+              <Typography variant="body2" color="inherit" component="div">
+                Staked {balance?.data?.stake || "0"} $RLC
+              </Typography>
+              <Button
                 onClick={handleAccount}
                 color="primary"
                 aria-label="show account"
                 component="label"
               >
-                <AccountCircleIcon />
-              </IconButton>
+                Account
+              </Button>
             </Box>
           )}
           {!isConnected && (

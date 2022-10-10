@@ -25,7 +25,6 @@ const applicationSlice = createSlice({
   },
 });
 
-export const selectOpenModal = (state: RootState) =>
-  state.application.openModal;
+export const selectOpenModal = (state: RootState) => state.application.openModal;
 export const { setOpenModal } = applicationSlice.actions;
 export default applicationSlice.reducer;
