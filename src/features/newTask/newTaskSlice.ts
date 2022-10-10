@@ -168,11 +168,8 @@ const newTaskApi = api.injectEndpoints({
               },
             };
 
-            let clean_requestOrderFields = removeEmptyProps(requestOrderFields);
-            console.log({ clean_requestOrderFields });
-
             const requestOrderToSign = await iexec.order.createRequestorder(
-              clean_requestOrderFields
+              removeEmptyProps(requestOrderFields)
             );
             const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
 
@@ -188,10 +185,8 @@ const newTaskApi = api.injectEndpoints({
               category
             );
 
-            let clean_requestOrderFields = removeEmptyProps(requestOrderFields);
-
             const requestOrderToSign = await iexec.order.createRequestorder(
-              clean_requestOrderFields
+              removeEmptyProps(requestOrderFields)
             );
 
             const requestOrder = await iexec.order.signRequestorder(requestOrderToSign);
@@ -247,6 +242,7 @@ async function getBestOrders(
 
   const { orders: wkpOrders } = await iexec.orderbook.fetchWorkerpoolOrderbook({
     category,
+    workerpool,
   });
   const workerpoolOrder = wkpOrders && wkpOrders[0] && wkpOrders[0].order;
   if (!workerpoolOrder) {

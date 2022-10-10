@@ -10,13 +10,16 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Controller, useForm } from "react-hook-form";
 import {
   selectSelectedApp,
   selectSelectedDataset,
   selectSelectedWorkerpool,
+  setSelectedApp,
+  setSelectedDataset,
+  setSelectedWorkerpool,
   useCreateRequestOrderMutation,
   useGetCategoriesQuery,
   useLazyFetchWorkerpoolOrderbookQuery,
@@ -54,7 +57,7 @@ export default function NewTaskForm() {
   const selectedWorkerpool = useAppSelector(selectSelectedWorkerpool);
   const [wpOrdersFetch, wpOrdersResult] = useLazyFetchWorkerpoolOrderbookQuery();
 
-  const { data: categoriesData, error } = useGetCategoriesQuery();
+  const { data: categoriesData } = useGetCategoriesQuery();
   const storageProviders = [
     { id: "ipfs", name: "Ipfs" },
     { id: "dropbox", name: "Dropbox" },
@@ -83,12 +86,18 @@ export default function NewTaskForm() {
   });
 
   useEffect(() => {
+    dispatch(setSelectedApp(""));
+    dispatch(setSelectedDataset(""));
+    dispatch(setSelectedWorkerpool(""));
+  }, [dispatch]);
+
+  useEffect(() => {
     reset({
       app: selectedApp,
       dataset: selectedDataset,
       workerpool: selectedWorkerpool,
     });
-  }, [selectedApp, selectedDataset, selectedWorkerpool]);
+  }, [selectedApp, selectedDataset, selectedWorkerpool, reset]);
 
   useEffect(() => {
     if (selectedWorkerpool.length > 0) {
@@ -143,6 +152,15 @@ export default function NewTaskForm() {
     dispatch(setOpenModal(AppModal.LOOKUP_WORKERPOOL_MODAL));
   };
 
+  const appValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedApp(e.target.value));
+
+  const datasetValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedDataset(e.target.value));
+
+  const workerpoolValueChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    dispatch(setSelectedWorkerpool(e.target.value));
+
   return (
     <>
       {result.isSuccess && <Navigate to="/" />}
@@ -172,6 +190,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={appValueChanged}
                               fullWidth
                               placeholder="app address"
                               required
@@ -201,6 +220,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={datasetValueChanged}
                               fullWidth
                               placeholder="dataset address"
                               label={"Dataset"}
@@ -229,6 +249,7 @@ export default function NewTaskForm() {
                             <TextField
                               {...field}
                               inputRef={ref}
+                              onChange={workerpoolValueChanged}
                               fullWidth
                               placeholder="workerpool address"
                               label={"Workerpool"}
