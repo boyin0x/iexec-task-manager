@@ -7,7 +7,11 @@ import { RequestOrderFields } from "./NewTaskForm";
 import { api, getIexecAndRefresh } from "../../app/api";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
-import { PublishedApporder, PublishedWorkerpoolorder } from "iexec/dist/lib/IExecOrderbookModule";
+import {
+  PublishedApporder,
+  PublishedDatasetorder,
+  PublishedWorkerpoolorder,
+} from "iexec/dist/lib/IExecOrderbookModule";
 
 const initialState = {
   selectedApp: "",
@@ -112,6 +116,14 @@ const newTaskApi = api.injectEndpoints({
       },
     }),
 
+    fetchDatasetOrderbook: builder.query<PublishedDatasetorder[], string>({
+      queryFn: async (dataset, { getState }) => {
+        const iexec = await getIexecAndRefresh(getState());
+        let s = await iexec.orderbook.fetchDatasetOrderbook(dataset);
+        return { data: s.orders };
+      },
+    }),
+
     fetchWorkerpoolOrderbook: builder.query<PublishedWorkerpoolorder[], string>({
       queryFn: async (workerpool, { getState }) => {
         const iexec = await getIexecAndRefresh(getState());
@@ -209,6 +221,7 @@ const newTaskApi = api.injectEndpoints({
   }),
 });
 export const {
+  useLazyFetchDatasetOrderbookQuery,
   useLazyFetchWorkerpoolOrderbookQuery,
   useLazyFetchAppOrderbookQuery,
   useGetCategoriesQuery,

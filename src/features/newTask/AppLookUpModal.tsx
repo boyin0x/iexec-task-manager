@@ -37,7 +37,7 @@ export default function AppLookUpModal() {
             {result?.data &&
               result.data?.apps.map((app) => (
                 <TableRow hover key={app.id}>
-                  <CollapsibleCell app={app} />
+                  <AppCollapsibleCell app={app} />
                 </TableRow>
               ))}
           </TableBody>
@@ -48,10 +48,11 @@ export default function AppLookUpModal() {
   );
 }
 
-function CollapsibleCell(props: { app: App }) {
+function AppCollapsibleCell(props: { app: App }) {
   const dispatch = useAppDispatch();
   const [showOrders, setShowOrders] = useState(false);
   const [fetch, { isUninitialized, isSuccess, data, isLoading }] = useLazyFetchAppOrderbookQuery();
+
   useEffect(() => {
     if (showOrders && isUninitialized) {
       fetch(props.app.id);
@@ -69,49 +70,40 @@ function CollapsibleCell(props: { app: App }) {
         <Typography>{props.app.id}</Typography>
         <Typography>{props.app.name}</Typography>
       </Box>
-
-      <Box>
-        {thereAreOrders && (
+      {showOrders && (
+        <Box>
           <Typography color="secondary" variant="body2">
-            Available orders:
+            {isSuccess && thereAreOrders && "Available orders:"}
+            {isLoading && "Looking for orders..."}
+            {isSuccess && !thereAreOrders && "There are no orders available."}
           </Typography>
-        )}
-        {isLoading && (
-          <Typography color="secondary" variant="body2">
-            Looking for orders...
-          </Typography>
-        )}
-        {showOrders && thereAreOrders && (
-          <IETable columnNames={["Price", "Remaining", "Status"]}>
-            <TableBody sx={{}}>
-              {data &&
-                data.map((order, idx) => (
-                  <TableRow key={props.app.id + Math.random()}>
-                    <TableCell component="th" scope="row">
-                      {order.order.appprice}
-                    </TableCell>
-                    <TableCell component="th" scope="row" align="center">
-                      {order.remaining}
-                    </TableCell>
-                    <TableCell component="th" scope="row" align="center">
-                      {order.status}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </IETable>
-        )}
-        {thereAreOrders && (
-          <Button fullWidth onClick={handleAppSelected}>
-            SELECT
-          </Button>
-        )}
-        {isSuccess && !thereAreOrders && (
-          <Typography color="secondary" variant="body2">
-            There are no orders available.
-          </Typography>
-        )}
-      </Box>
+          {thereAreOrders && (
+            <IETable columnNames={["Price", "Remaining", "Status"]}>
+              <TableBody sx={{}}>
+                {data &&
+                  data.map((order, idx) => (
+                    <TableRow key={props.app.id + Math.random()}>
+                      <TableCell component="th" scope="row">
+                        {order.order.appprice}
+                      </TableCell>
+                      <TableCell component="th" scope="row" align="center">
+                        {order.remaining}
+                      </TableCell>
+                      <TableCell component="th" scope="row" align="center">
+                        {order.status}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </IETable>
+          )}
+          {thereAreOrders && (
+            <Button fullWidth onClick={handleAppSelected}>
+              SELECT
+            </Button>
+          )}
+        </Box>
+      )}
     </TableCell>
   );
 }
