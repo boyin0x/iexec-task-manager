@@ -69,6 +69,22 @@ export const homeApi = api.injectEndpoints({
       },
     }),
 
+    hasDownloadableResult: builder.query<boolean, string>({
+      queryFn: async (taskId, { getState }) => {
+        try {
+          const iexec = await getIexecAndRefresh(getState());
+          const task = await iexec.task.show(taskId);
+          let results = task.results as { storage: string; location: string };
+          console.log(results, results && results.location.length > 0)
+          return {
+            data: results && results.location.length > 0
+          };
+        } catch (e) {
+          return { error: (e as Error).message || e };
+        }
+      },
+    }),
+
     fetchTaskResult: builder.query<string, string>({
       queryFn: async (taskId, { getState }) => {
         try {
@@ -86,6 +102,7 @@ export const homeApi = api.injectEndpoints({
 });
 
 export const {
+  useHasDownloadableResultQuery,
   useLazyFetchTaskResultQuery,
   useCancelRequestorderMutation,
   useGetTasksQuery,

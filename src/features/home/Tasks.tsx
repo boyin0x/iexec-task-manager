@@ -2,7 +2,11 @@ import { Button, TableBody, TableCell, TableRow } from "@mui/material";
 import { useAppSelector } from "../../app/hooks";
 import { selectAccountUserAddress } from "../account/accountSlice";
 import IETable from "../../components/IETable.tsx";
-import { useGetTasksQuery, useLazyFetchTaskResultQuery } from "./homeSlice";
+import {
+  useHasDownloadableResultQuery,
+  useGetTasksQuery,
+  useLazyFetchTaskResultQuery,
+} from "./homeSlice";
 import { useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import DownloadIcon from "@mui/icons-material/DownloadSharp";
@@ -37,7 +41,7 @@ export default function Tasks() {
 
 function DownloadAction(props: { taskId: string }) {
   const [trigger, { data, isLoading, isError, isSuccess, error }] = useLazyFetchTaskResultQuery();
-
+  const { data: somethingToDownload } = useHasDownloadableResultQuery(props.taskId);
   useEffect(() => {
     if (error) {
       toast.error(error.toString());
@@ -63,7 +67,11 @@ function DownloadAction(props: { taskId: string }) {
 
   return (
     <>
-      <Button disabled={isLoading || isError} size="small" onClick={() => trigger(props.taskId)}>
+      <Button
+        disabled={isLoading || isError || !somethingToDownload}
+        size="small"
+        onClick={() => trigger(props.taskId)}
+      >
         <DownloadIcon aria-label="Download" />
       </Button>
     </>
