@@ -10,6 +10,7 @@ import {
   useLazyFetchWorkerpoolOrderbookQuery,
 } from "./newTaskSlice";
 import { Workerpool } from "../../generated/graphql";
+import { useResolveRestricted } from "./useResolveRestricted";
 
 export default function WorkerpoolLookUpModal() {
   const [trigger, result] = useLazySearchWorkerpoolsQuery();
@@ -17,9 +18,13 @@ export default function WorkerpoolLookUpModal() {
   const handleSearchTextChange = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchText(e.target.value);
 
+  const { restrictedWorkerpools: restricted } = useResolveRestricted();
+  const restrictedWorkerpools = restricted.length > 0 ? JSON.stringify(restricted) : undefined;
+
   useEffect(() => {
-    trigger(searchText);
-  }, [searchText, trigger]);
+    // console.log({ restrictedWorkerpools, searchText });
+    trigger({ restrictedWorkerpools, searchText });
+  }, [searchText, trigger, restrictedWorkerpools]);
 
   return (
     <>

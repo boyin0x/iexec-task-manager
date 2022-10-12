@@ -2,7 +2,7 @@ import { gql } from "graphql-request";
 
 import { App, Category, Dataset, Workerpool } from "../../generated/graphql";
 import { IExec } from "iexec";
-import { removeEmptyProps } from "../../helpers/utils";
+import { ADDRESS_ZERO, removeEmptyProps } from "../../helpers/utils";
 import { RequestOrderFields } from "./NewTaskForm";
 import { api, getIexecAndRefresh } from "../../app/api";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -57,77 +57,113 @@ const newTaskApi = api.injectEndpoints({
       }),
     }),
 
-    searchApps: builder.query<{ apps: App[] }, string>({
-      query: (searchText) => ({
+    searchApps: builder.query<{ apps: App[] }, { restrictedApps?: string; searchText: string }>({
+      query: (args) => ({
         document: gql`
           query getApps($searchText: String) {
-            apps(first: 100, where: { name_contains_nocase: $searchText }) {
+            apps(first: 100, where: { name_contains_nocase: $searchText 
+              ${args.restrictedApps ? ", id_in: " + args.restrictedApps.toLowerCase() : ""} 
+            }) {
               id
               name
             }
           }
         `,
-        variables: {
-          searchText,
-        },
+        variables: args,
       }),
     }),
 
-    searchDatasets: builder.query<{ datasets: Dataset[] }, string>({
-      query: (searchText) => ({
+    searchDatasets: builder.query<
+      { datasets: Dataset[] },
+      { restrictedDatasets?: string; searchText: string }
+    >({
+      query: (args) => ({
         document: gql`
           query getDatasets($searchText: String) {
-            datasets: datasets(first: 100, where: { name_contains_nocase: $searchText }) {
+            datasets: datasets(first: 100, where: { name_contains_nocase: $searchText 
+            ${args.restrictedDatasets ? ", id_in: " + args.restrictedDatasets.toLowerCase() : ""} 
+            }) {
               id
               name
             }
           }
         `,
-        variables: {
-          searchText,
-        },
+        variables: args,
       }),
     }),
 
-    searchWorkerpools: builder.query<{ workerpools: Workerpool[] }, string>({
-      query: (searchText) => ({
+    searchWorkerpools: builder.query<
+      { workerpools: Workerpool[] },
+      { restrictedWorkerpools?: string; searchText: string }
+    >({
+      query: (args) => ({
         document: gql`
           query getWorkerpools($searchText: String) {
             workerpools: workerpools(
               first: 100
-              where: { description_contains_nocase: $searchText }
-            ) {
+              where: { description_contains_nocase: $searchText 
+                ${
+                  args.restrictedWorkerpools
+                    ? ", id_in: " + args.restrictedWorkerpools.toLowerCase()
+                    : ""
+                } 
+            }) {
               id
               description
             }
           }
         `,
-        variables: {
-          searchText,
-        },
+        variables: args,
       }),
     }),
 
     fetchAppOrderbook: builder.query<PublishedApporder[], string>({
       queryFn: async (app, { getState }) => {
         const iexec = await getIexecAndRefresh(getState());
-        let s = await iexec.orderbook.fetchAppOrderbook(app);
-        return { data: s.orders };
+        const account = await iexec.wallet.getAddress();
+        let result = await iexec.orderbook.fetchAppOrderbook(app);
+
+        let orders = result.orders.filter(
+          (order) =>
+            order.order.requesterrestrict.length === 0 ||
+            order.order.requesterrestrict === ADDRESS_ZERO ||
+            order.order.requesterrestrict === account
+        );
+        return { data: orders };
       },
     }),
 
     fetchDatasetOrderbook: builder.query<PublishedDatasetorder[], string>({
       queryFn: async (dataset, { getState }) => {
         const iexec = await getIexecAndRefresh(getState());
-        let s = await iexec.orderbook.fetchDatasetOrderbook(dataset);
-        return { data: s.orders };
+        const account = await iexec.wallet.getAddress();
+        let result = await iexec.orderbook.fetchDatasetOrderbook(dataset);
+
+        let orders = result.orders.filter(
+          (order) =>
+            order.order.requesterrestrict.length === 0 ||
+            order.order.requesterrestrict === ADDRESS_ZERO ||
+            order.order.requesterrestrict === account
+        );
+        return { data: orders };
       },
     }),
 
     fetchWorkerpoolOrderbook: builder.query<PublishedWorkerpoolorder[], string>({
       queryFn: async (workerpool, { getState }) => {
         const iexec = await getIexecAndRefresh(getState());
-        let { orders } = await iexec.orderbook.fetchWorkerpoolOrderbook({ workerpool });
+        const account = await iexec.wallet.getAddress();
+        let result = await iexec.orderbook.fetchWorkerpoolOrderbook({
+          workerpool,
+        });
+
+        let orders = result.orders.filter(
+          (order) =>
+            order.order.requesterrestrict.length === 0 ||
+            order.order.requesterrestrict === ADDRESS_ZERO ||
+            order.order.requesterrestrict === account
+        );
+
         return { data: orders };
       },
     }),

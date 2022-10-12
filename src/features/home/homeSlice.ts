@@ -14,7 +14,7 @@ export const homeApi = api.injectEndpoints({
         try {
           const iexec = await getIexecAndRefresh(getState());
 
-          const { count, orders } = await iexec.orderbook.fetchRequestOrderbook({ requester });
+          const { orders } = await iexec.orderbook.fetchRequestOrderbook({ requester });
 
           let casted = orders as unknown as PublishedRequestorder[];
           return { data: casted };
@@ -75,9 +75,8 @@ export const homeApi = api.injectEndpoints({
           const iexec = await getIexecAndRefresh(getState());
           const task = await iexec.task.show(taskId);
           let results = task.results as { storage: string; location: string };
-          console.log(results, results && results.location.length > 0)
           return {
-            data: results && results.location.length > 0
+            data: results && results.location.length > 0,
           };
         } catch (e) {
           return { error: (e as Error).message || e };

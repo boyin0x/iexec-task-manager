@@ -10,6 +10,7 @@ import {
   useLazySearchAppsQuery,
 } from "./newTaskSlice";
 import { App } from "../../generated/graphql";
+import { useResolveRestricted } from "./useResolveRestricted";
 
 export default function AppLookUpModal() {
   const [trigger, result] = useLazySearchAppsQuery();
@@ -17,9 +18,13 @@ export default function AppLookUpModal() {
   const handleSearchTextChange = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchText(e.target.value);
 
+  const { restrictedApps: restricted } = useResolveRestricted();
+  const restrictedApps = restricted ? JSON.stringify(restricted) : undefined;
+
   useEffect(() => {
-    trigger(searchText);
-  }, [searchText, trigger]);
+    // console.log({ restrictedApps, searchText });
+    trigger({ restrictedApps, searchText });
+  }, [searchText, trigger, restrictedApps]);
 
   return (
     <>

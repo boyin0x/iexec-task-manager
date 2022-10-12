@@ -10,16 +10,20 @@ import {
   useLazyFetchDatasetOrderbookQuery,
 } from "./newTaskSlice";
 import { Dataset } from "../../generated/graphql";
+import { useResolveRestricted } from "./useResolveRestricted";
 
 export default function DatasetLookUpModal() {
   const [trigger, result] = useLazySearchDatasetsQuery();
   const [searchText, setSearchText] = useState("");
   const handleSearchTextChange = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchText(e.target.value);
+  const { restrictedDatasets: restricted } = useResolveRestricted();
+  const restrictedDatasets = restricted ? JSON.stringify(restricted) : undefined;
 
   useEffect(() => {
-    trigger(searchText);
-  }, [searchText, trigger]);
+    // console.log({ restrictedDatasets, searchText });
+    trigger({ restrictedDatasets, searchText });
+  }, [searchText, trigger, restrictedDatasets]);
 
   return (
     <>

@@ -12,3 +12,5 @@ export const truncateAddress = (address: string) => {
   if (!match) return address;
   return `${match[1]}…${match[2]}`;
 };
+
+export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
